@@ -119,12 +119,21 @@ class FrogPilotPlanner:
     lead_distance = radarState.leadOne.dRel + increased_stopping_distance
 
     # Offset by FrogAi for FrogPilot for a more natural takeoff with a lead
-    if self.aggressive_acceleration:
+    if self.aggressive_acceleration and v_lead > v_ego:
       distance_factor = np.maximum(1, lead_distance - (v_lead * t_follow))
       standstill_offset = max(STOP_DISTANCE + increased_stopping_distance - (v_ego**2), 0)
       acceleration_offset = np.clip((v_lead - v_ego) + standstill_offset - COMFORT_BRAKE, 1, distance_factor)
       jerk /= acceleration_offset
       t_follow /= acceleration_offset
+
+    # Offset by FrogAi for FrogPilot for a more natural approach to a slower lead
+    if self.smoother_braking and v_lead < v_ego:
+      distance_factor = np.maximum(1, lead_distance - (v_lead * t_follow))
+      far_lead_offset = max((lead_distance - (v_ego * t_follow)) - STOP_DISTANCE - increased_stopping_distance, 0) if self.smoother_braking_far_lead else 0
+      braking_offset = np.clip((v_ego - v_lead) + far_lead_offset - COMFORT_BRAKE, 1, distance_factor)
+      if self.smoother_braking_jerk:
+        jerk *= max(braking_offset / COMFORT_BRAKE * t_follow, 1)
+      t_follow /= braking_offset
 
     return jerk, t_follow
 
@@ -205,6 +214,9 @@ class FrogPilotPlanner:
     self.deceleration_profile = self.params.get_int("DecelerationProfile") if longitudinal_tune else 0
     self.aggressive_acceleration = longitudinal_tune and self.params.get_bool("AggressiveAcceleration")
     self.increased_stopping_distance = self.params.get_int("StoppingDistance") * (1 if self.is_metric else CV.FOOT_TO_METER) if longitudinal_tune else 0
+    self.smoother_braking = longitudinal_tune and self.params.get_bool("SmoothBraking")
+    self.smoother_braking_far_lead = self.smoother_braking and self.params.get_bool("SmoothBrakingFarLead") and self.staging
+    self.smoother_braking_jerk = self.smoother_braking and self.params.get_bool("SmoothBrakingJerk") and self.staging
 
     self.map_turn_speed_controller = self.CP.openpilotLongitudinalControl and self.params.get_bool("MTSCEnabled")
     self.mtsc_curvature_check = self.map_turn_speed_controller and self.params.get_bool("MTSCCurvatureCheck")
