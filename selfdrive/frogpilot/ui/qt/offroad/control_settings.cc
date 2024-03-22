@@ -79,6 +79,7 @@ FrogPilotControlsPanel::FrogPilotControlsPanel(SettingsWindow *parent) : FrogPil
     {"ForceAutoTune", tr("Force Auto Tune"), tr("Forces comma's auto lateral tuning for unsupported vehicles."), ""},
     {"NNFF", tr("NNFF"), tr("Use Twilsonco's Neural Network Feedforward for enhanced precision in lateral control."), ""},
     {"NNFFLite", tr("NNFF-Lite"), tr("Use Twilsonco's Neural Network Feedforward for enhanced precision in lateral control for cars without available NNFF logs."), ""},
+    {"SteerRatio", steerRatioStock != 0 ? QString(tr("Steer Ratio (Default: %1)")).arg(QString::number(steerRatioStock, 'f', 2)) : tr("Steer Ratio"), tr("Use a custom steer ratio as opposed to comma's auto tune value."), ""},
     {"TurnDesires", tr("Use Turn Desires"), tr("Use turn desires for greater precision in turns below the minimum lane change speed."), ""},
 
     {"LongitudinalTune", tr("Longitudinal Tuning"), tr("Modify openpilot's acceleration and braking behavior."), "../frogpilot/assets/toggle_icons/icon_longitudinal_tune.png"},
@@ -308,6 +309,10 @@ FrogPilotControlsPanel::FrogPilotControlsPanel(SettingsWindow *parent) : FrogPil
         }
       });
       toggle = lateralTuneToggle;
+    } else if (param == "SteerRatio") {
+      std::vector<QString> steerRatioToggles{"ResetSteerRatio"};
+      std::vector<QString> steerRatioToggleNames{"Reset"};
+      toggle = new FrogPilotParamValueToggleControl(param, title, desc, icon, steerRatioStock * 0.75, steerRatioStock * 1.25, std::map<int, QString>(), this, false, "", 1, 0.01, steerRatioToggles, steerRatioToggleNames);
 
     } else if (param == "LongitudinalTune") {
       FrogPilotParamManageControl *longitudinalTuneToggle = new FrogPilotParamManageControl(param, title, desc, icon, this);
@@ -809,6 +814,13 @@ void FrogPilotControlsPanel::showEvent(QShowEvent *event, const UIState &s) {
   started = s.scene.started;
 
   downloadModelBtn->setEnabled(online && (!started || parked));
+
+  if (params.getBool("ResetSteerRatio")) {
+    FrogPilotParamValueToggleControl *steerRatioToggle = static_cast<FrogPilotParamValueToggleControl*>(toggles["SteerRatio"]);
+    params.putFloat("SteerRatio", steerRatioStock);
+    params.putBool("ResetSteerRatio", false);
+    steerRatioToggle->refresh();
+  }
 }
 
 void FrogPilotControlsPanel::updateState() {
@@ -839,6 +851,12 @@ void FrogPilotControlsPanel::updateCarToggles() {
     hasOpenpilotLongitudinal = CP.getOpenpilotLongitudinalControl() && !params.getBool("DisableOpenpilotLongitudinal");
     hasPCMCruise = CP.getPcmCruise();
     isToyota = carName == "toyota";
+    steerRatioStock = CP.getSteerRatio();
+
+    FrogPilotParamValueToggleControl *steerRatioToggle = static_cast<FrogPilotParamValueToggleControl*>(toggles["SteerRatio"]);
+    steerRatioToggle->setTitle(QString(tr("Steer Ratio (Default: %1)")).arg(QString::number(steerRatioStock, 'f', 2)));
+    steerRatioToggle->updateControl(steerRatioStock * 0.75, steerRatioStock * 1.25, "", 0.01);
+    steerRatioToggle->refresh();
   } else {
     hasAutoTune = false;
     hasCommaNNFFSupport = false;
