@@ -42,7 +42,7 @@ private:
   std::set<QString> deviceManagementKeys = {"DeviceShutdown", "HigherBitrate", "LowVoltageShutdown", "MuteOverheated", "NoLogging", "NoUploads", "OfflineMode"};
   std::set<QString> experimentalModeActivationKeys = {"ExperimentalModeViaDistance", "ExperimentalModeViaLKAS", "ExperimentalModeViaTap"};
   std::set<QString> laneChangeKeys = {"LaneChangeTime", "LaneDetectionWidth", "OneLaneChange"};
-  std::set<QString> lateralTuneKeys = {"ForceAutoTune", "NNFF", "NNFFLite", "TurnDesires"};
+  std::set<QString> lateralTuneKeys = {"ForceAutoTune", "NNFF", "NNFFLite", "SteerRatio", "TurnDesires"};
   std::set<QString> longitudinalTuneKeys = {"AccelerationProfile", "AggressiveAcceleration", "DecelerationProfile", "LeadDetectionThreshold", "SmoothBraking", "StoppingDistance", "TrafficMode"};
   std::set<QString> mtscKeys = {"DisableMTSCSmoothing", "MTSCAggressiveness", "MTSCCurvatureCheck"};
   std::set<QString> qolKeys = {"CustomCruise", "DisableOnroadUploads", "OnroadDistanceButton", "PauseLateralOnSignal", "PauseLateralSpeed", "ReverseCruise", "SetSpeedOffset"};
@@ -67,4 +67,6 @@ private:
   bool isStaging;
   bool isToyota;
   bool started;
+
+  float steerRatioStock;
 };
