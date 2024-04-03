@@ -1096,6 +1096,7 @@ void AnnotatedCameraWidget::updateFrogPilotWidgets() {
 
   experimentalMode = scene.experimental_mode;
 
+  laneDetectionWidth = scene.lane_detection_width;
   laneWidthLeft = scene.lane_width_left;
   laneWidthRight = scene.lane_width_right;
 
