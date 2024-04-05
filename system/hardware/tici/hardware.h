@@ -50,6 +50,23 @@ public:
   }
 
   static void reboot() { std::system("sudo reboot"); }
+  static void soft_reboot() {
+    const std::vector<std::string> commands = {
+      "rm -f /tmp/safe_staging_overlay.lock",
+      "tmux new -s commatmp -d '/data/continue.sh'",
+      "tmux kill-session -t comma",
+      "tmux rename comma"
+    };
+    for (const auto& cmd : commands) {
+      int result;
+      do {
+        result = std::system(cmd.c_str());
+      } while (result != 0);
+      if (result != 0) {
+        reboot();
+      }
+    }
+  }
   static void poweroff() { std::system("sudo poweroff"); }
   static void set_brightness(int percent) {
     std::string max = util::read_file("/sys/class/backlight/panel0-backlight/max_brightness");
