@@ -25,6 +25,10 @@ private:
   void updateState();
   void updateToggles();
 
+  ButtonControl *deleteModelBtn;
+  ButtonControl *downloadModelBtn;
+  ButtonControl *selectModelBtn;
+
   FrogPilotDualParamControl *aggressiveProfile;
   FrogPilotDualParamControl *conditionalSpeedsImperial;
   FrogPilotDualParamControl *conditionalSpeedsMetric;
