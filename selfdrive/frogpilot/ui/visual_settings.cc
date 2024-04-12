@@ -68,6 +68,8 @@ FrogPilotVisualsPanel::FrogPilotVisualsPanel(SettingsWindow *parent) : FrogPilot
     {"StandbyMode", "Standby Mode", "Turn the screen off after your screen times out when onroad but wake it back up when engagement state changes or important alerts are triggered.", ""},
 
     {"WheelIcon", "Steering Wheel Icon", "Replace the default steering wheel icon with a custom design, adding a unique touch to your interface.", "../assets/offroad/icon_openpilot.png"},
+
+    {"StartupAlert", "Startup Message", "Replace the default startup alert with a custom message, adding a unique touch to your interface.", "../frogpilot/assets/toggle_icons/icon_custom.png"},
   };
 
   for (const auto &[param, title, desc, icon] : visualToggles) {
@@ -244,6 +246,10 @@ FrogPilotVisualsPanel::FrogPilotVisualsPanel(SettingsWindow *parent) : FrogPilot
       std::vector<QString> wheelToggleNames{tr("Rotating")};
       std::map<int, QString> steeringWheelLabels = {{-1, "None"}, {0, "Stock"}, {1, "Lexus"}, {2, "Toyota"}, {3, "Frog"}, {4, "Rocket"}, {5, "Hyundai"}, {6, "Stalin"}};
       toggle = new FrogPilotParamValueToggleControl(param, title, desc, icon, -1, 6, steeringWheelLabels, this, true, "", 1, wheelToggles, wheelToggleNames);
+
+    } else if (param == "StartupAlert") {
+      std::map<int, QString> messageLabels = {{0, "Stock"}, {1, "Frogger"}, {2, "Hippity"}};
+      toggle = new FrogPilotParamValueControl(param, title, desc, icon, 0, 2, messageLabels, this, true);
 
     } else {
       toggle = new ParamControl(param, title, desc, icon, this);

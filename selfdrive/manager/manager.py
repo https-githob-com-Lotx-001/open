@@ -255,6 +255,7 @@ def manager_init() -> None:
     ("StandardFollow", "1.45"),
     ("StandardJerk", "1.0"),
     ("StandbyMode", "0"),
+    ("StartupAlert", "0"),
     ("SteerRatio", "0"),
     ("StockTune", "0"),
     ("StoppingDistance", "0"),
