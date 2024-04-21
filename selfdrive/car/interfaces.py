@@ -211,10 +211,8 @@ class CarInterfaceBase(ABC):
     self.params_memory = Params("/dev/shm/params")
 
     lateral_tune = self.params.get_bool("LateralTune")
-    nnff_supported = self.initialize_lat_torque_nn(CP.carFingerprint, eps_firmware)
-    use_comma_nnff = self.check_comma_nn_ff_support(CP.carFingerprint)
-    self.use_nnff = not use_comma_nnff and nnff_supported and lateral_tune and self.params.get_bool("NNFF")
-    self.use_nnff_lite = not use_comma_nnff and not nnff_supported and lateral_tune and self.params.get_bool("NNFFLite")
+    self.use_nnff = self.initialize_lat_torque_nn(CP.carFingerprint, eps_firmware) and lateral_tune and self.params.get_bool("NNFF")
+    self.use_nnff_lite = lateral_tune and self.params.get_bool("NNFFLite")
 
     self.belowSteerSpeed_shown = False
     self.disable_belowSteerSpeed = False
@@ -240,7 +238,7 @@ class CarInterfaceBase(ABC):
 
   def initialize_lat_torque_nn(self, car, eps_firmware):
     self.lat_torque_nn_model, _ = get_nn_model(car, eps_firmware)
-    return (self.lat_torque_nn_model is not None)
+    return (self.lat_torque_nn_model is not None) and not self.check_comma_nn_ff_support(car)
 
   @staticmethod
   def get_pid_accel_limits(CP, current_speed, cruise_speed, frogpilot_variables):
