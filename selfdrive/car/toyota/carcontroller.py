@@ -10,6 +10,8 @@ from openpilot.selfdrive.car.toyota.values import CAR, STATIC_DSU_MSGS, NO_STOP_
                                         UNSUPPORTED_DSU_CAR, STOP_AND_GO_CAR
 from opendbc.can.packer import CANPacker
 
+from openpilot.selfdrive.frogpilot.controls.lib.frogpilot_functions import CRUISING_SPEED
+
 LongCtrlState = car.CarControl.Actuators.LongControlState
 SteerControlType = car.CarParams.SteerControlType
 VisualAlert = car.CarControl.HUDControl.VisualAlert
@@ -254,7 +256,7 @@ class CarController(CarControllerBase):
     new_actuators.gas = self.gas
 
     # Lock doors when in drive / unlock doors when in park
-    if self.doors_unlocked and CS.out.gearShifter != PARK:
+    if self.doors_unlocked and CS.out.gearShifter != PARK and CS.out.vEgo >= CRUISING_SPEED:
       if frogpilot_variables.lock_doors:
         can_sends.append(make_can_msg(0x750, LOCK_CMD, 0))
       self.doors_locked = True
