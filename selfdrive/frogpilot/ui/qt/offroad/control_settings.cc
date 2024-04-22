@@ -106,6 +106,7 @@ FrogPilotControlsPanel::FrogPilotControlsPanel(SettingsWindow *parent) : FrogPil
 
     {"QOLControls", tr("Quality of Life"), tr("Miscellaneous quality of life changes to improve your overall openpilot experience."), "../frogpilot/assets/toggle_icons/quality_of_life.png"},
     {"CustomCruise", tr("Cruise Increase Interval"), tr("Set a custom interval to increase the max set speed by."), ""},
+    {"CustomCruiseLong", tr("Cruise Increase Interval (Long Press)"), tr("Set a custom interval to increase the max set speed by when holding down the cruise increase button."), ""},
     {"DisableOnroadUploads", tr("Disable Onroad Uploads"), tr("Prevent uploads to comma connect unless you're offroad and connected to Wi-Fi."), ""},
     {"OnroadDistanceButton", tr("Onroad Distance Button"), tr("Simulate a distance button via the onroad UI to control personalities, 'Experimental Mode', and 'Traffic Mode'."), ""},
     {"PauseLateralSpeed", tr("Pause Lateral Below"), tr("Pause lateral control on all speeds below the set speed."), ""},
@@ -544,6 +545,7 @@ FrogPilotControlsPanel::FrogPilotControlsPanel(SettingsWindow *parent) : FrogPil
             modifiedQolKeys.erase("ReverseCruise");
           } else {
             modifiedQolKeys.erase("CustomCruise");
+            modifiedQolKeys.erase("CustomCruiseLong");
             modifiedQolKeys.erase("SetSpeedOffset");
           }
 
@@ -552,6 +554,8 @@ FrogPilotControlsPanel::FrogPilotControlsPanel(SettingsWindow *parent) : FrogPil
       });
       toggle = qolToggle;
     } else if (param == "CustomCruise") {
+      toggle = new FrogPilotParamValueControl(param, title, desc, icon, 1, 99, std::map<int, QString>(), this, false, tr(" mph"));
+    } else if (param == "CustomCruiseLong") {
       toggle = new FrogPilotParamValueControl(param, title, desc, icon, 1, 99, std::map<int, QString>(), this, false, tr(" mph"));
     } else if (param == "OnroadDistanceButton") {
       std::vector<QString> onroadDistanceToggles{"KaofuiIcons"};
@@ -872,6 +876,7 @@ void FrogPilotControlsPanel::updateMetric() {
     params.putIntNonBlocking("CESpeed", std::nearbyint(params.getInt("CESpeed") * speedConversion));
     params.putIntNonBlocking("CESpeedLead", std::nearbyint(params.getInt("CESpeedLead") * speedConversion));
     params.putIntNonBlocking("CustomCruise", std::nearbyint(params.getInt("CustomCruise") * speedConversion));
+    params.putIntNonBlocking("CustomCruiseLong", std::nearbyint(params.getInt("CustomCruiseLong") * speedConversion));
     params.putIntNonBlocking("LaneDetectionWidth", std::nearbyint(params.getInt("LaneDetectionWidth") * distanceConversion));
     params.putIntNonBlocking("Offset1", std::nearbyint(params.getInt("Offset1") * speedConversion));
     params.putIntNonBlocking("Offset2", std::nearbyint(params.getInt("Offset2") * speedConversion));
@@ -884,6 +889,7 @@ void FrogPilotControlsPanel::updateMetric() {
   }
 
   FrogPilotParamValueControl *customCruiseToggle = static_cast<FrogPilotParamValueControl*>(toggles["CustomCruise"]);
+  FrogPilotParamValueControl *customCruiseLongToggle = static_cast<FrogPilotParamValueControl*>(toggles["CustomCruiseLong"]);
   FrogPilotParamValueControl *laneWidthToggle = static_cast<FrogPilotParamValueControl*>(toggles["LaneDetectionWidth"]);
   FrogPilotParamValueControl *offset1Toggle = static_cast<FrogPilotParamValueControl*>(toggles["Offset1"]);
   FrogPilotParamValueControl *offset2Toggle = static_cast<FrogPilotParamValueControl*>(toggles["Offset2"]);
@@ -896,6 +902,7 @@ void FrogPilotControlsPanel::updateMetric() {
 
   if (isMetric) {
     customCruiseToggle->updateControl(1, 150, tr(" kph"));
+    customCruiseLongToggle->updateControl(1, 150, tr(" kph"));
 
     offset1Toggle->setTitle(tr("Speed Limit Offset (0-34 kph)"));
     offset2Toggle->setTitle(tr("Speed Limit Offset (35-54 kph)"));
@@ -921,6 +928,7 @@ void FrogPilotControlsPanel::updateMetric() {
     stoppingDistanceToggle->updateControl(0, 5, tr(" meters"));
   } else {
     customCruiseToggle->updateControl(1, 99, tr(" mph"));
+    customCruiseLongToggle->updateControl(1, 99, tr(" mph"));
 
     offset1Toggle->setTitle(tr("Speed Limit Offset (0-34 mph)"));
     offset2Toggle->setTitle(tr("Speed Limit Offset (35-54 mph)"));
@@ -947,6 +955,7 @@ void FrogPilotControlsPanel::updateMetric() {
   }
 
   customCruiseToggle->refresh();
+  customCruiseLongToggle->refresh();
   laneWidthToggle->refresh();
   offset1Toggle->refresh();
   offset2Toggle->refresh();

@@ -254,6 +254,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"CustomAlerts", PERSISTENT},
     {"CustomColors", PERSISTENT},
     {"CustomCruise", PERSISTENT},
+    {"CustomCruiseLong", PERSISTENT},
     {"CustomIcons", PERSISTENT},
     {"CustomPaths", PERSISTENT},
     {"CustomPersonalities", PERSISTENT},

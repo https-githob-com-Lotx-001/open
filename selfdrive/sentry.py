@@ -98,7 +98,7 @@ def capture_fingerprint(params, candidate, blocked=False):
     "ForceAutoTune", "NNFF", "NNFFLite", "SteerRatio", "TurnDesires", "SteerRatio", "LongitudinalTune", "AccelerationProfile", "DecelerationProfile",
     "AggressiveAcceleration", "StoppingDistance", "LeadDetectionThreshold", "SmoothBraking", "SmoothBrakingFarLead", "SmoothBrakingJerk", "TrafficMode",
     "MTSCEnabled", "DisableMTSCSmoothing", "MTSCCurvatureCheck", "MTSCAggressiveness", "ModelSelector", "Model", "NudgelessLaneChange", "LaneChangeTime",
-    "LaneDetectionWidth", "OneLaneChange", "LaneDetectionWidth", "QOLControls", "CustomCruise", "CustomcruiseLong", "DisableOnroadUploads", "HigherBitrate",
+    "LaneDetectionWidth", "OneLaneChange", "LaneDetectionWidth", "QOLControls", "CustomCruise", "CustomCruiseLong", "DisableOnroadUploads", "HigherBitrate",
     "OnroadDistanceButton", "KaofuiIcons", "PauseLateralSpeed", "PauseLateralOnSignal", "ReverseCruise", "SetSpeedOffset", "SpeedLimitController", "Offset1",
     "Offset2", "Offset3", "Offset4", "SLCFallback", "SLCOverride", "SLCPriority", "SLCConfirmation", "SLCConfirmationLower", "SLCConfirmationHigher",
     "ForceMPHDashboard", "SetSpeedLimit", "ShowSLCOffset", "ShowSLCOffsetUI", "UseVienna", "VisionTurnControl", "DisableVTSCSmoothing", "CurveSensitivity",
