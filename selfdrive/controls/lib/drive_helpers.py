@@ -117,7 +117,7 @@ class VCruiseHelper:
       return
 
     v_cruise_delta = v_cruise_delta * (5 if long_press else frogpilot_variables.custom_cruise_increase)
-    if long_press and self.v_cruise_kph % v_cruise_delta != 0:  # partial interval
+    if (long_press or frogpilot_variables.custom_cruise_increase % 5 == 0) and self.v_cruise_kph % v_cruise_delta != 0:  # partial interval
       self.v_cruise_kph = CRUISE_NEAREST_FUNC[button_type](self.v_cruise_kph / v_cruise_delta) * v_cruise_delta
     else:
       self.v_cruise_kph += v_cruise_delta * CRUISE_INTERVAL_SIGN[button_type]
