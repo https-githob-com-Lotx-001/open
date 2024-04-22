@@ -68,8 +68,7 @@ def frogpilot_thread():
 
   pm = messaging.PubMaster(['frogpilotPlan'])
   sm = messaging.SubMaster(['carState', 'controlsState', 'deviceState', 'frogpilotCarControl', 'frogpilotNavigation',
-                            'frogpilotPlan', 'liveLocationKalman', 'longitudinalPlan', 'modelV2', 'radarState'],
-                           poll='modelV2', ignore_avg_freq=['radarState'])
+                            'frogpilotPlan', 'liveLocationKalman', 'longitudinalPlan', 'modelV2'], poll='modelV2')
 
   while True:
     sm.update()
@@ -86,7 +85,7 @@ def frogpilot_thread():
 
       if sm.updated['modelV2']:
         frogpilot_planner.update(sm['carState'], sm['controlsState'], sm['frogpilotCarControl'], sm['frogpilotNavigation'],
-                                  sm['liveLocationKalman'], sm['modelV2'], sm['radarState'])
+                                  sm['liveLocationKalman'], sm['modelV2'])
         frogpilot_planner.publish(sm, pm)
 
     if params_memory.get("ModelToDownload", encoding='utf-8') is not None and github_pinged():

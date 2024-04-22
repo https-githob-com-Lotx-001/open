@@ -5,7 +5,7 @@ import urllib.request
 
 from openpilot.common.params import Params
 
-VERSION = 'v1'
+VERSION = 'v2'
 REPOSITORY_URL = 'https://github.com/FrogAi/FrogPilot-Resources/releases/download'
 
 DEFAULT_MODEL = "wd-40"

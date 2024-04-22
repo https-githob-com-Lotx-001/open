@@ -30,7 +30,7 @@ PROCESS_NAME = "selfdrive.modeld.modeld"
 SEND_RAW_PRED = os.getenv('SEND_RAW_PRED')
 
 MODEL_NAME = Params().get("Model", encoding='utf-8')
-DISABLE_NAV = MODEL_NAME in {"wd-40"}
+DISABLE_NAV = MODEL_NAME in {"radical-turtle", "wd-40"}
 
 MODEL_PATHS = {
   ModelRunner.THNEED: Path(__file__).parent / ('models/supercombo.thneed' if MODEL_NAME == DEFAULT_MODEL else f'{MODELS_PATH}/{MODEL_NAME}.thneed'),
@@ -67,6 +67,7 @@ class ModelState:
       **({'nav_features': np.zeros(ModelConstants.NAV_FEATURE_LEN, dtype=np.float32),
           'nav_instructions': np.zeros(ModelConstants.NAV_INSTRUCTION_LEN, dtype=np.float32)} if not DISABLE_NAV else {}),
       'features_buffer': np.zeros(ModelConstants.HISTORY_BUFFER_LEN * ModelConstants.FEATURE_LEN, dtype=np.float32),
+      'radar_tracks': np.zeros(ModelConstants.RADAR_TRACKS_LEN * ModelConstants.RADAR_TRACKS_WIDTH, dtype=np.float32),
     }
 
     with open(METADATA_PATH, 'rb') as f:
@@ -102,6 +103,7 @@ class ModelState:
     if not DISABLE_NAV:
       self.inputs['nav_features'][:] = inputs['nav_features']
       self.inputs['nav_instructions'][:] = inputs['nav_instructions']
+    self.inputs['radar_tracks'][:] = inputs['radar_tracks']
 
     # if getCLBuffer is not None, frame will be None
     self.model.setInputBuffer("input_imgs", self.frame.prepare(buf, transform.flatten(), self.model.getCLBuffer("input_imgs")))
@@ -160,7 +162,7 @@ def main(demo=False):
 
   # messaging
   pm = PubMaster(["modelV2", "cameraOdometry"])
-  sm = SubMaster(["deviceState", "carState", "roadCameraState", "liveCalibration", "driverMonitoringState", "navModel", "navInstruction", "carControl", "frogpilotPlan"])
+  sm = SubMaster(["deviceState", "carState", "roadCameraState", "liveCalibration", "driverMonitoringState", "navModel", "navInstruction", "carControl", "liveTracks", "frogpilotPlan"])
 
   publish_state = PublishState()
   params = Params()
@@ -270,6 +272,14 @@ def main(demo=False):
         if 0 <= distance_idx < 50:
           nav_instructions[distance_idx*3 + direction_idx] = 1
 
+    radar_tracks = np.zeros(ModelConstants.RADAR_TRACKS_LEN * ModelConstants.RADAR_TRACKS_WIDTH, dtype=np.float32)
+    if sm.updated["liveTracks"]:
+      for i, track in enumerate(sm["liveTracks"]):
+        if i >= ModelConstants.RADAR_TRACKS_LEN:
+          break
+        vec_index = i * ModelConstants.RADAR_TRACKS_WIDTH
+        radar_tracks[vec_index:vec_index+ModelConstants.RADAR_TRACKS_WIDTH] = [track.dRel, track.yRel, track.vRel]
+
     # tracked dropped frames
     vipc_dropped_frames = max(0, meta_main.frame_id - last_vipc_frame_id - 1)
     frames_dropped = frame_dropped_filter.update(min(vipc_dropped_frames, 10))
@@ -288,7 +298,8 @@ def main(demo=False):
       'traffic_convention': traffic_convention,
       'lateral_control_params': lateral_control_params,
       **({'nav_features': nav_features, 'nav_instructions': nav_instructions} if not DISABLE_NAV else {}),
-      }
+      'radar_tracks': radar_tracks,
+    }
 
     mt1 = time.perf_counter()
     model_output = model.run(buf_main, buf_extra, model_transform_main, model_transform_extra, inputs, prepare_only)

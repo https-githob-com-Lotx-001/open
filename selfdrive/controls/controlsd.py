@@ -98,9 +98,9 @@ class Controls:
       ignore += ['driverCameraState', 'managerState']
     self.sm = messaging.SubMaster(['deviceState', 'pandaStates', 'peripheralState', 'modelV2', 'liveCalibration',
                                    'carOutput', 'driverMonitoringState', 'longitudinalPlan', 'liveLocationKalman',
-                                   'managerState', 'liveParameters', 'radarState', 'liveTorqueParameters',
+                                   'managerState', 'liveParameters', 'liveTorqueParameters',
                                    'testJoystick', 'frogpilotPlan'] + self.camera_packets + self.sensor_packets,
-                                  ignore_alive=ignore, ignore_avg_freq=ignore+['radarState', 'testJoystick'], ignore_valid=['testJoystick', ],
+                                  ignore_alive=ignore, ignore_avg_freq=ignore+['testJoystick'], ignore_valid=['testJoystick', ],
                                   frequency=int(1/DT_CTRL))
 
     self.joystick_mode = self.params.get_bool("JoystickDebugMode")
@@ -363,8 +363,8 @@ class Controls:
           self.events.add(EventName.cameraFrameRate)
     if not REPLAY and self.rk.lagging:
       self.events.add(EventName.controlsdLagging)
-    if len(self.sm['radarState'].radarErrors) or (not self.rk.lagging and not self.sm.all_checks(['radarState'])):
-      self.events.add(EventName.radarFault)
+    # if len(self.sm['radarState'].radarErrors) or (not self.rk.lagging and not self.sm.all_checks(['radarState'])):
+    #   self.events.add(EventName.radarFault)
     if not self.sm.valid['pandaStates']:
       self.events.add(EventName.usbError)
     if CS.canTimeout:
@@ -977,19 +977,19 @@ class Controls:
       self.events.add(EventName.holidayActive)
       self.holiday_theme_alerted = True
 
-    if self.lead_departing_alert and self.sm.frame % 50 == 0:
-      lead = self.sm['radarState'].leadOne
-      lead_distance = lead.dRel
+    # if self.lead_departing_alert and self.sm.frame % 50 == 0:
+      # lead = self.sm['radarState'].leadOne
+      # lead_distance = lead.dRel
 
-      lead_departing = lead_distance - self.previous_lead_distance > 0.5 and self.previous_lead_distance != 0 and CS.standstill
-      self.previous_lead_distance = lead_distance
+      # lead_departing = lead_distance - self.previous_lead_distance > 0.5 and self.previous_lead_distance != 0 and CS.standstill
+      # self.previous_lead_distance = lead_distance
 
-      lead_departing &= not CS.gasPressed
-      lead_departing &= lead.vLead > 1
-      lead_departing &= self.driving_gear
+      # lead_departing &= not CS.gasPressed
+      # lead_departing &= lead.vLead > 1
+      # lead_departing &= self.driving_gear
 
-      if lead_departing:
-        self.events.add(EventName.leadDeparting)
+      # if lead_departing:
+        # self.events.add(EventName.leadDeparting)
 
     if not CS.standstill:
       if self.sm['modelV2'].meta.turnDirection == Desire.turnLeft:
