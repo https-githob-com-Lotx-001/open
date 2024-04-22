@@ -217,7 +217,7 @@ class FrogPilotPlanner:
     else:
       self.vtsc_target = v_cruise
 
-    targets = [self.mtsc_target, max(self.overridden_speed, self.slc_target) - v_cruise_diff, self.vtsc_target]
+    targets = [self.mtsc_target, max(self.overridden_speed, self.slc_target) - v_ego_diff, self.vtsc_target]
     filtered_targets = [target if target > CRUISING_SPEED else v_cruise for target in targets]
 
     return min(filtered_targets)
