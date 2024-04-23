@@ -55,6 +55,8 @@ class CarState(CarStateBase):
     self.zss_compute = False
     self.zss_cruise_active_last = False
 
+    self.pcm_accel_net = 0.0
+    self.pcm_neutral_force = 0.0
     self.zss_angle_offset = 0
     self.zss_threshold_count = 0
 
@@ -103,6 +105,8 @@ class CarState(CarStateBase):
     else:
       ret.vEgoCluster = ret.vEgo * 1.015  # minimum of all the cars
 
+    self.pcm_accel_net = cp.vl["PCM_CRUISE"]["ACCEL_NET"]
+    self.pcm_neutral_force = cp.vl["PCM_CRUISE"]["NEUTRAL_FORCE"]
     ret.standstill = abs(ret.vEgoRaw) < 1e-3
 
     ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]["STEER_ANGLE"] + cp.vl["STEER_ANGLE_SENSOR"]["STEER_FRACTION"]

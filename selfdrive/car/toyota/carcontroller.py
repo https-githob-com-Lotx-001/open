@@ -41,6 +41,17 @@ UNLOCK_CMD = b'\x40\x05\x30\x11\x00\x40\x00\x00'
 
 PARK = car.CarState.GearShifter.park
 
+
+def compute_gb_toyota(accel, speed):
+  creep_brake = 0.0
+  creep_speed = 2.3
+  creep_brake_value = 0.15
+  if speed < creep_speed:
+    creep_brake = (creep_speed - speed) / creep_speed * creep_brake_value
+  gb = accel - creep_brake
+  return gb
+
+
 class CarController(CarControllerBase):
   def __init__(self, dbc_name, CP, VM):
     self.CP = CP
@@ -67,6 +78,8 @@ class CarController(CarControllerBase):
 
     self.doors_locked = False
     self.doors_unlocked = True
+
+    self.pcm_accel_comp = 0
 
   def update(self, CC, CS, now_nanos, frogpilot_variables):
     actuators = CC.actuators
@@ -163,9 +176,33 @@ class CarController(CarControllerBase):
     # only calculate pcm_accel_cmd when long is active to prevent disengagement from accelerator depression
     if CC.longActive:
       if frogpilot_variables.sport_plus:
-        pcm_accel_cmd = clip(actuators.accel + accel_offset, self.params.ACCEL_MIN, self.params.ACCEL_MAX_PLUS)
+        if self.frogs_go_moo_tune:
+          wind_brake = interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
+
+          gas_accel = compute_gb_toyota(actuators.accel, CS.out.vEgo) + wind_brake
+          self.pcm_accel_comp = clip(gas_accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.03, self.pcm_accel_comp + 0.03)
+          pcm_accel_cmd = gas_accel + self.pcm_accel_comp
+
+          if not CC.longActive:
+            pcm_accel_cmd = 0.0
+
+          pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX_PLUS)
+        else:
+          pcm_accel_cmd = clip(actuators.accel + accel_offset, self.params.ACCEL_MIN, self.params.ACCEL_MAX_PLUS)
       else:
-        pcm_accel_cmd = clip(actuators.accel + accel_offset, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
+        if self.frogs_go_moo_tune:
+          wind_brake = interp(CS.out.vEgo, [0.0, 2.3, 35.0], [0.001, 0.002, 0.15])
+
+          gas_accel = compute_gb_toyota(actuators.accel, CS.out.vEgo) + wind_brake
+          self.pcm_accel_comp = clip(gas_accel - CS.pcm_accel_net, self.pcm_accel_comp - 0.03, self.pcm_accel_comp + 0.03)
+          pcm_accel_cmd = gas_accel + self.pcm_accel_comp
+
+          if not CC.longActive:
+            pcm_accel_cmd = 0.0
+
+          pcm_accel_cmd = clip(pcm_accel_cmd, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
+        else:
+          pcm_accel_cmd = clip(actuators.accel + accel_offset, self.params.ACCEL_MIN, self.params.ACCEL_MAX)
     else:
       pcm_accel_cmd = 0.
 

@@ -151,20 +151,21 @@ class CarInterface(CarInterfaceBase):
     elif params.get_bool("FrogsGoMooTune"):
       # on stock Toyota this is -2.5
       ret.stopAccel = -2.5
-      ret.stoppingDecelRate = 0.09
+      ret.stoppingDecelRate = 0.3
 
-      ret.vEgoStopping = 0.15
-      ret.vEgoStarting = 0.15
+      # In MPH  = [11,  78]
+      tune.kpBP = [5., 35.]
+      tune.kpV = [0.5, 0.5]
 
-      tune.deadzoneBP = [0., 16., 20., 30.]
-      tune.deadzoneV =  [0., .03, .06, .15]
+      # In MPH  = [  0,  27]
+      tune.kiBP = [ 0.,  12]
+      tune.kiV =  [.35, .25]
 
-      tune.kpBP = [0., 5., 20.]
-      tune.kpV = [1.3, 1.0, 0.7]
-
-      # In MPH  = [  0,   27,   45,  60,  89]
-      tune.kiBP = [ 0.,  12.,  20., 27., 40.]
-      tune.kiV =  [.35, .215, .195, .10, .01]
+      if candidate in TSS2_CAR:
+        ret.vEgoStopping = 0.1
+        ret.vEgoStarting = 0.1
+        ret.longitudinalActuatorDelayLowerBound = 0.3
+        ret.longitudinalActuatorDelayUpperBound = 0.4
     elif (candidate in TSS2_CAR or ret.enableGasInterceptor) and params.get_bool("DragonPilotTune"):
       # Credit goes to the DragonPilot team!
       tune.deadzoneBP = [0., 16., 20., 30.]
